@@ -37,7 +37,7 @@ def realizar_ping(ip, nombre='host'):
         print(f'Ocurrió un error: {e}')
 
 def ejecutar_comando(comando):
-    print(f'Ejecutando prueba, por favor espere...')
+    print(f'Ejecutando prueba, por favor espere...\n')
     try:
         result = subprocess.run(comando, capture_output=True, text=True)
         
@@ -78,6 +78,8 @@ def diagnostico_automatico():
     for ip, nombre in hosts:
         print(f'Verificando conexión con {nombre}')
         realizar_ping(ip, nombre)
+    
+    speedtest()
 
 def menu():
     opciones={
