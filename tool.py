@@ -35,8 +35,8 @@ def ejecutar_comando(comando):
     except Exception as e:
         print(f'Ocurrió un error: {e}')
 
-def tracert_dns():
-    comando = ['tracert', hosts['8.8.8.8']] if platform.system().lower() == 'windows' else ['traceroute', hosts['8.8.8.8']]
+def tracert_dns(direccion):
+    comando = ['tracert',direccion] if platform.system().lower() == 'windows' else ['traceroute',direccion]
     ejecutar_comando(comando)
 
 def speedtest():
@@ -52,8 +52,8 @@ def diagnostico_automatico():
 def menu():
     opciones = {
         1: diagnostico_automatico,
-        2: lambda: realizar_ping('8.8.8.8', 'la Internet'),
-        3: tracert_dns,
+        2: lambda:realizar_ping('8.8.8.8', 'la Internet'),
+        3: lambda:tracert_dns('8.8.8.8'),
         4: speedtest,
         0: exit
     }
