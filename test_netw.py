@@ -37,6 +37,7 @@ def realizar_ping(ip, nombre='host'):
         print(f'Ocurrió un error: {e}')
 
 def ejecutar_comando(comando):
+    print(f'Ejecutando prueba, por favor espere...')
     try:
         result = subprocess.run(comando, capture_output=True, text=True)
         
@@ -48,7 +49,7 @@ def ejecutar_comando(comando):
         print(f'Ocurrió un error: {e}')
 
 def ping_dns():
-    realizar_ping(ip_dns,'Internet')
+    realizar_ping(ip_dns,'la Internet')
 
 def ping_host_1():
     realizar_ping(ip_host1, 'el Router')
@@ -63,12 +64,16 @@ def tracert_dns():
     comando=['tracert',ip_dns] if platform.system().lower() == 'windows' else ['traceroute', ip_dns]
     ejecutar_comando(comando)
 
+def speedtest():
+    comando = ['speedtest.exe']
+    ejecutar_comando(comando)
+
 def diagnostico_automatico():
     hosts = [
-        (ip_host1,'Router'),
-        (ip_host2,'ISP 1'),
-        (ip_host3,'ISP 2'),
-        (ip_dns,'Internet')
+        (ip_host1,'el Router'),
+        (ip_host2,'el ISP 1'),
+        (ip_host3,'el ISP 2'),
+        (ip_dns,'la Internet')
     ]
     for ip, nombre in hosts:
         print(f'Verificando conexión con {nombre}')
@@ -79,13 +84,15 @@ def menu():
         1:lambda:diagnostico_automatico(),
         2:lambda:ping_dns(),
         3:lambda:tracert_dns(),
+        4:lambda:speedtest(),
         0:lambda:exit()
     }
 
     while True:
         print(f'1: Diagnóstico automático')
-        print(f'5: Verificar conexión a Internet')
-        print(f'6: Trazar ruta hacia Internet')
+        print(f'2: Verificar conexión a Internet')
+        print(f'3: Trazar ruta hacia Internet')
+        print(f'4: Prueba de velocidad')
         print(f'0: Salir\n')
         
         try:
