@@ -2,30 +2,28 @@ import subprocess
 import platform
 import os
 
-#guardo las direcciones que necesito consultar
+ip_dns = '8.8.8.8' #IP del DNS
 ip_host1 = '192.168.1.1' #IP de DMP
-ip_host2 = '192.168.199.1' #IP del hEX
-ip_dns = '94.140.14.14' #IP del DNS
 
-#con este codigo obtengo el nombre del DNS a partir de su direccion IP
-if ip_dns == '1.1.1.1' : nombre_dns = 'CloudFlare'
-elif ip_dns == '8.8.8.8' : nombre_dns = 'Google'
-elif ip_dns == '94.140.14.14' : nombre_dns = 'AdGuard'
+dns_nombres={
+    '1.1.1.1':'CloudFlare',
+    '8.8.8.8':'Google',
+    '94.140.14.14':'AdGuard'
+}
+nombre_dns=dns_nombres.get(ip_dns, 'Desconocido')
 
-#la siguiente funcion me permite limpiar la pantalla de la terminal
 def limpiar_pantalla():
     if platform.system().lower() == 'windows':
         os.system('cls')
     else:
         os.system('clear')
 
-#la siguiente funcion me permite hacer ping a la direccion IP del host 1
-def ping_host_1():
+def realizar_ping(ip, nombre='host'):
     try:
         if platform.system().lower() == 'windows':
-            comando = ['ping','-n','4',ip_host1]
+            comando = ['ping', '-n', '4', ip]
         else:
-            comando = ['ping','-c','4',ip_host1]
+            comando = ['ping', '-c', '4', ip]
 
         resultado = subprocess.run(
             comando,
@@ -34,65 +32,17 @@ def ping_host_1():
             text=True
         )
         if resultado.returncode == 0:
-            print(f'    Ping exitoso, hay conexión con el host\n')
+            print(f'    Ping exitoso, hay conexión con {nombre}\n')
             #print(resultado.stdout)
         else:
-            print(f'    No se pudo hacer ping al host\n')
+            print(f'    No se pudo hacer ping a {nombre}\n')
             #print(resultado.stderr)
 
     except Exception as e:
         print(f'Ocurrió un error: {e}')
 
-#la siguiente funcion me permite hacer ping a la direccion IP del host 2
-def ping_host_2():
+def ejecutar_comando(comando):
     try:
-        if platform.system().lower() == 'windows':
-            comando = ['ping','-n','4',ip_host2]
-        else:
-            comando = ['ping','-c','4',ip_host2]
-
-        resultado = subprocess.run(
-            comando,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if resultado.returncode == 0:
-            print(f'    Ping exitoso, hay conexión con el host\n')
-            #print(resultado.stdout)
-        else:
-            print(f'    No se pudo hacer ping al host\n')
-            #print(resultado.stderr)
-    except Exception as e:
-        print(f'Ocurrió un error: {e}')
-
-#la siguiente funcion me permite hacer ping a la direccion IP del DNS
-def ping_dns():
-    try:
-        if platform.system().lower() == "windows":
-            comando = ['ping','-n','4',ip_dns]
-        else:
-            comando = ['ping','-c','4',ip_dns]
-
-        resultado = subprocess.run(
-            comando,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if resultado.returncode == 0:
-            print(f'    Ping exitoso, hay conexión con {nombre_dns}\n')
-            #print(resultado.stdout)
-        else:
-            print(f'    No se pudo hacer ping a {nombre_dns}\n')
-            #print(resultado.stderr)
-    except Exception as e:
-        print(f'Ocurrió un error: {e}')
-
-#la siguiente funcion me permite trazar la ruta hacia la direccion IP del DNS
-def tracert_dns():
-    try:
-        comando = ['tracert', ip_dns] if subprocess.os.name == 'nt' else ['traceroute', ip_dns]
         result = subprocess.run(comando, capture_output=True, text=True)
         
         if result.returncode == 0:
@@ -102,63 +52,51 @@ def tracert_dns():
     except Exception as e:
         print(f'Ocurrió un error: {e}')
 
-#la siguiente funcion me permite ejecutar un diagnostico automatico
-def diag_auto():
-    print(f'Verificando conexión con el host {ip_host1}')
-    ping_host_1()
-    print(f'Verificando conexión con el host {ip_host2}')
-    ping_host_2()
-    print(f'Verificando conexión con {nombre_dns}')
-    ping_dns()
+def ping_dns():
+    realizar_ping(ip_dns, nombre_dns)
 
-#la siguiente funcion me permite mostrar un menu con las opciones disponibles
+def ping_host_1():
+    realizar_ping(ip_host1, "host 1")
+
+def tracert_dns():
+    comando=['tracert',ip_dns] if platform.system().lower() == 'windows' else ['traceroute', ip_dns]
+    ejecutar_comando(comando)
+
+def diagnostico_automatico():
+    hosts = [
+        (ip_host1,'host 1'),
+        (ip_dns, nombre_dns)
+    ]
+    for ip, nombre in hosts:
+        print(f'Verificando conexión con {nombre}')
+        realizar_ping(ip, nombre)
+
 def menu():
+    opciones={
+        1:lambda:ping_dns(),
+        2:lambda:tracert_dns(),
+        3:lambda:diagnostico_automatico(),
+        4:lambda:ping_host_1(),
+        0:lambda:exit()
+    }
+
     while True:
         print(f'1: Verificar conexión a internet')
         print(f'2: Trazar ruta hacia {nombre_dns}')
         print(f'3: Diagnóstico automático')
         print(f'4: Verificar conexion con el host {ip_host1}')
-        print(f'5: Verificar conexión con el host {ip_host2}')
         print(f'0: Salir\n')
-        opcion = int(input(f'Ingrese el número de la acción correspondiente: '))
-        limpiar_pantalla()
-
-
-        if opcion == 1:
-            print(f'Verificando conexión a internet...\n')
-            ping_dns()
-            input('Presione Enter para volver al menú ')
+        
+        try:
+            opcion = int(input(f'Ingrese el número de la acción correspondiente: '))
             limpiar_pantalla()
+            if opcion in opciones:
+                opciones[opcion]()
+                input('Presione Enter para volver al menú ')
+                limpiar_pantalla()
+            else:
+                print(f'La opción no es válida')
+        except ValueError:
+            print(f'Por favor, ingrese un número válido.')
 
-        elif opcion == 2:
-            print(f'Trazando ruta hacia {nombre_dns}\n')
-            tracert_dns()
-            input('Presione Enter para volver al menú ')
-            limpiar_pantalla()
-
-        elif opcion == 3:
-            print(f'Ejecutando diagnóstico automático...\n')
-            diag_auto()
-            input('Presione Enter para volver al menú ')
-            limpiar_pantalla()
-
-        elif  opcion == 4:
-            print(f'Verificando conexión con el host {ip_host1}\n')
-            ping_host_1()
-            input('Presione Enter para volver al menú ')
-            limpiar_pantalla()
-
-        elif opcion == 5:
-            print(f'Verificando conexión con el host {ip_host2}\n')
-            ping_host_2()
-            input('Presione Enter para volver al menú ')
-            limpiar_pantalla()
-
-        elif opcion == 0:
-            break
-
-        else:
-            print(f'La opción no es válida')
-
-#inicio el programa
 menu()
