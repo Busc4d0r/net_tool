@@ -2,45 +2,32 @@ import subprocess
 import platform
 import os
 
-ip_dns='8.8.8.8' #IP del DNS
-ip_host1='192.168.1.1' #IP de DMP
-ip_host2='192.168.100.1' #IP de ISP1
-ip_host3='192.168.101.1' #IP de ISP2
+# Diccionario de hosts
+hosts = {
+    '192.168.1.1': 'el Router',
+    '192.168.100.1': 'el ISP 1',
+    '192.168.101.1': 'el ISP 2',
+    '8.8.8.8': 'la Internet'
+}
 
 def limpiar_pantalla():
-    if platform.system().lower() == 'windows':
-        os.system('cls')
-    else:
-        os.system('clear')
+    os.system('cls' if platform.system().lower() == 'windows' else 'clear')
 
 def realizar_ping(ip, nombre='host'):
     try:
-        if platform.system().lower() == 'windows':
-            comando = ['ping', '-n', '2', ip]
-        else:
-            comando = ['ping', '-c', '2', ip]
-
-        resultado = subprocess.run(
-            comando,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        comando = ['ping', '-n', '2', ip] if platform.system().lower() == 'windows' else ['ping', '-c', '2', ip]
+        resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         if resultado.returncode == 0:
             print(f'    Hay conexión con {nombre}\n')
-            #print(resultado.stdout)
         else:
-            print(f'    No hay conexión {nombre}\n')
-            #print(resultado.stderr)
-
+            print(f'    No hay conexión con {nombre}\n')
     except Exception as e:
-        print(f'Ocurrió un error: {e}')
+        print(f'Ocurrió un error al intentar hacer ping a {nombre} ({ip}): {e}')
 
 def ejecutar_comando(comando):
     print(f'Ejecutando prueba, por favor espere...\n')
     try:
         result = subprocess.run(comando, capture_output=True, text=True)
-        
         if result.returncode == 0:
             print(result.stdout)
         else:
@@ -48,20 +35,8 @@ def ejecutar_comando(comando):
     except Exception as e:
         print(f'Ocurrió un error: {e}')
 
-def ping_dns():
-    realizar_ping(ip_dns,'la Internet')
-
-def ping_host_1():
-    realizar_ping(ip_host1, 'el Router')
-
-def pign_host_2():
-    realizar_ping(ip_host2,'el ISP 1')
-
-def ping_host_3():
-    realizar_ping(ip_host3,'el ISP 2')
-
 def tracert_dns():
-    comando=['tracert',ip_dns] if platform.system().lower() == 'windows' else ['traceroute', ip_dns]
+    comando = ['tracert', hosts['8.8.8.8']] if platform.system().lower() == 'windows' else ['traceroute', hosts['8.8.8.8']]
     ejecutar_comando(comando)
 
 def speedtest():
@@ -69,25 +44,18 @@ def speedtest():
     ejecutar_comando(comando)
 
 def diagnostico_automatico():
-    hosts = [
-        (ip_host1,'el Router'),
-        (ip_host2,'el ISP 1'),
-        (ip_host3,'el ISP 2'),
-        (ip_dns,'la Internet')
-    ]
-    for ip, nombre in hosts:
+    for ip, nombre in hosts.items():
         print(f'Verificando conexión con {nombre}')
         realizar_ping(ip, nombre)
-    
     speedtest()
 
 def menu():
-    opciones={
-        1:lambda:diagnostico_automatico(),
-        2:lambda:ping_dns(),
-        3:lambda:tracert_dns(),
-        4:lambda:speedtest(),
-        0:lambda:exit()
+    opciones = {
+        1: diagnostico_automatico,
+        2: lambda: realizar_ping('8.8.8.8', 'la Internet'),
+        3: tracert_dns,
+        4: speedtest,
+        0: exit
     }
 
     while True:
@@ -96,7 +64,7 @@ def menu():
         print(f'3: Trazar ruta hacia Internet')
         print(f'4: Prueba de velocidad')
         print(f'0: Salir\n')
-        
+
         try:
             opcion = int(input(f'Ingrese el número de la acción correspondiente: '))
             limpiar_pantalla()
