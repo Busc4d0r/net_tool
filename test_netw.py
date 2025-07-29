@@ -2,15 +2,10 @@ import subprocess
 import platform
 import os
 
-ip_dns = '8.8.8.8' #IP del DNS
-ip_host1 = '192.168.1.1' #IP de DMP
-
-dns_nombres={
-    '1.1.1.1':'CloudFlare',
-    '8.8.8.8':'Google',
-    '94.140.14.14':'AdGuard'
-}
-nombre_dns=dns_nombres.get(ip_dns, 'Desconocido')
+ip_dns='8.8.8.8' #IP del DNS
+ip_host1='192.168.1.1' #IP de DMP
+ip_host2='192.168.100.1' #IP de ISP1
+ip_host3='192.168.101.1' #IP de ISP2
 
 def limpiar_pantalla():
     if platform.system().lower() == 'windows':
@@ -21,9 +16,9 @@ def limpiar_pantalla():
 def realizar_ping(ip, nombre='host'):
     try:
         if platform.system().lower() == 'windows':
-            comando = ['ping', '-n', '4', ip]
+            comando = ['ping', '-n', '2', ip]
         else:
-            comando = ['ping', '-c', '4', ip]
+            comando = ['ping', '-c', '2', ip]
 
         resultado = subprocess.run(
             comando,
@@ -32,10 +27,10 @@ def realizar_ping(ip, nombre='host'):
             text=True
         )
         if resultado.returncode == 0:
-            print(f'    Ping exitoso, hay conexión con {nombre}\n')
+            print(f'    Hay conexión con {nombre}\n')
             #print(resultado.stdout)
         else:
-            print(f'    No se pudo hacer ping a {nombre}\n')
+            print(f'    No hay conexión {nombre}\n')
             #print(resultado.stderr)
 
     except Exception as e:
@@ -53,10 +48,16 @@ def ejecutar_comando(comando):
         print(f'Ocurrió un error: {e}')
 
 def ping_dns():
-    realizar_ping(ip_dns, nombre_dns)
+    realizar_ping(ip_dns,'Internet')
 
 def ping_host_1():
-    realizar_ping(ip_host1, "host 1")
+    realizar_ping(ip_host1, 'el Router')
+
+def pign_host_2():
+    realizar_ping(ip_host2,'el ISP 1')
+
+def ping_host_3():
+    realizar_ping(ip_host3,'el ISP 2')
 
 def tracert_dns():
     comando=['tracert',ip_dns] if platform.system().lower() == 'windows' else ['traceroute', ip_dns]
@@ -64,8 +65,10 @@ def tracert_dns():
 
 def diagnostico_automatico():
     hosts = [
-        (ip_host1,'host 1'),
-        (ip_dns, nombre_dns)
+        (ip_host1,'Router'),
+        (ip_host2,'ISP 1'),
+        (ip_host3,'ISP 2'),
+        (ip_dns,'Internet')
     ]
     for ip, nombre in hosts:
         print(f'Verificando conexión con {nombre}')
@@ -73,18 +76,16 @@ def diagnostico_automatico():
 
 def menu():
     opciones={
-        1:lambda:ping_dns(),
-        2:lambda:tracert_dns(),
-        3:lambda:diagnostico_automatico(),
-        4:lambda:ping_host_1(),
+        1:lambda:diagnostico_automatico(),
+        2:lambda:ping_dns(),
+        3:lambda:tracert_dns(),
         0:lambda:exit()
     }
 
     while True:
-        print(f'1: Verificar conexión a internet')
-        print(f'2: Trazar ruta hacia {nombre_dns}')
-        print(f'3: Diagnóstico automático')
-        print(f'4: Verificar conexion con el host {ip_host1}')
+        print(f'1: Diagnóstico automático')
+        print(f'5: Verificar conexión a Internet')
+        print(f'6: Trazar ruta hacia Internet')
         print(f'0: Salir\n')
         
         try:
