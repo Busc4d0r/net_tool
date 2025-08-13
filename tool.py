@@ -57,7 +57,7 @@ def menu():
         4: speedtest,
         0: exit
     }
-
+    
     while True:
         print(f'1: Diagnóstico automático')
         print(f'2: Verificar conexión a Internet')
