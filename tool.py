@@ -5,8 +5,8 @@ import os
 # Diccionario de hosts
 hosts = {
     '192.168.1.1': 'el Router',
-    '192.168.100.1': 'el ISP 1',
-    '192.168.101.1': 'el ISP 2',
+    '192.168.100.1': 'Servitel',
+    '192.168.101.1': 'Inter',
     '8.8.8.8': 'la Internet'
 }
 
