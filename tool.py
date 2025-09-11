@@ -66,9 +66,9 @@ def realizar_speedtest():
         velocidad_subida = st.upload() / 1_000_000  # Convertir a Mbps
         
         print("\n---Resultados de la Prueba de Velocidad---")
-        print(f"Descarga: {Fore.CYAN}{velocidad_descarga:.2f} Mbps")
-        print(f"Subida:   {Fore.CYAN}{velocidad_subida:.2f} Mbps")
-        print(f"Ping:     {Fore.CYAN}{st.results.ping} ms")
+        print(f"    Descarga: {Fore.CYAN}{velocidad_descarga:.2f} Mbps")
+        print(f"    Subida:   {Fore.CYAN}{velocidad_subida:.2f} Mbps")
+        print(f"    Ping:     {Fore.CYAN}{st.results.ping} ms")
         print("------------------------------------------\n")
 
     except Exception as e:
@@ -82,7 +82,6 @@ def diagnostico_automatico():
             print(Fore.GREEN + f'    ✓ Hay conexión con {nombre}\n')
         else:
             print(Fore.RED + f'    ✗ No hay conexión con {nombre}\n')
-    realizar_speedtest()
 
 # Menú principal
 def menu():
