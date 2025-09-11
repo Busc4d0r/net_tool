@@ -9,6 +9,7 @@ init(autoreset=True)
 
 # Constante para verificar el sistema operativo
 IS_WINDOWS = platform.system().lower() == 'windows'
+
 # Diccionario de hosts
 hosts = {
     '192.168.1.1': 'el Router',
@@ -59,7 +60,7 @@ def realizar_speedtest():
         print('Realizando prueba de subida...')
         velocidad_subida = st.upload() / 1_000_000  # Convertir a Mbps
         
-        print("\n--- Resultados de la Prueba de Velocidad ---")
+        print("\n---Resultados de la Prueba de Velocidad---")
         print(f"Descarga: {Fore.CYAN}{velocidad_descarga:.2f} Mbps")
         print(f"Subida:   {Fore.CYAN}{velocidad_subida:.2f} Mbps")
         print(f"Ping:     {Fore.CYAN}{st.results.ping} ms")
@@ -80,7 +81,6 @@ def diagnostico_automatico():
 def verificar_internet():
     # """Función específica para el menú que verifica la conexión a Internet."""
     diagnostico_automatico() # Reutilizamos la lógica del diagnóstico para el ping
-
 
 def menu():
     opciones = {
