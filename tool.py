@@ -18,9 +18,23 @@ hosts = {
     '8.8.8.8': 'la Internet'
 }
 
+# Función para limpiar la pantalla
 def limpiar_pantalla():
     os.system('cls' if IS_WINDOWS else 'clear')
 
+# Función para ejecutar un comando en la terminal
+def ejecutar_comando(comando):
+    print(f'Ejecutando prueba, por favor espere...\n')
+    try:
+        # Usamos Popen para mostrar la salida en tiempo real
+        proceso = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
+        for linea in proceso.stdout:
+            print(linea, end='')
+        proceso.wait()
+    except Exception as e:
+        print(Fore.RED + f'Ocurrió un error: {e}')
+
+# Función para realizar un ping a una IP
 def realizar_ping(ip, nombre='host'):
         # """Realiza un ping a una IP y devuelve True si hay éxito, False si no."""
     try:
@@ -33,21 +47,12 @@ def realizar_ping(ip, nombre='host'):
         # Si hay un error (ej. check=True falla), asumimos que no hay conexión
         return False
 
-def ejecutar_comando(comando):
-    print(f'Ejecutando prueba, por favor espere...\n')
-    try:
-        # Usamos Popen para mostrar la salida en tiempo real
-        proceso = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-        for linea in proceso.stdout:
-            print(linea, end='')
-        proceso.wait()
-    except Exception as e:
-        print(Fore.RED + f'Ocurrió un error: {e}')
-
+# Función para trazar una ruta hacia Internet
 def tracert_dns(direccion):
     comando = ['tracert', direccion] if IS_WINDOWS else ['traceroute', direccion]
     ejecutar_comando(comando)
 
+# Función para realizar una prueba de velocidad
 def realizar_speedtest():
     # """Realiza una prueba de velocidad usando la biblioteca speedtest-cli."""
     try:
@@ -69,6 +74,7 @@ def realizar_speedtest():
     except Exception as e:
         print(Fore.RED + f'Ocurrió un error durante la prueba de velocidad: {e}')
 
+# Función para el diagnóstico automático
 def diagnostico_automatico():
     for ip, nombre in hosts.items():
         print(f'Verificando conexión con {nombre}')
@@ -78,24 +84,19 @@ def diagnostico_automatico():
             print(Fore.RED + f'    ✗ No hay conexión con {nombre}\n')
     realizar_speedtest()
 
-def verificar_internet():
-    # """Función específica para el menú que verifica la conexión a Internet."""
-    diagnostico_automatico() # Reutilizamos la lógica del diagnóstico para el ping
-
+# Menú principal
 def menu():
     opciones = {
         '1': diagnostico_automatico,
-        '2': verificar_internet,
-        '3': lambda: tracert_dns('8.8.8.8'),
-        '4': realizar_speedtest,
+        '2': lambda: tracert_dns('8.8.8.8'),
+        '3': realizar_speedtest,
         '0': exit
     }
     
     while True:
         print(f'1: Diagnóstico automático')
-        print(f'2: Verificar conexión a Internet')
-        print(f'3: Trazar ruta hacia Internet')
-        print(f'4: Prueba de velocidad')
+        print(f'2: Trazar ruta hacia Internet')
+        print(f'3: Prueba de velocidad')
         print(f'0: Salir\n')
 
         try:
@@ -113,5 +114,6 @@ def menu():
         except ValueError:
             print(Fore.RED + f'Por favor, ingrese un número válido.')
 
+# Punto de entrada del programa
 if __name__ == "__main__":
     menu()
