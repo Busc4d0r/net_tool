@@ -13,17 +13,6 @@ hosts = {
 def limpiar_pantalla():
     os.system('cls' if platform.system().lower() == 'windows' else 'clear')
 
-def realizar_ping(ip, nombre='host'):
-    try:
-        comando = ['ping', '-n', '2', ip] if platform.system().lower() == 'windows' else ['ping', '-c', '2', ip]
-        resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if resultado.returncode == 0:
-            print(f'    Hay conexión con {nombre}\n')
-        else:
-            print(f'    No hay conexión con {nombre}\n')
-    except Exception as e:
-        print(f'Ocurrió un error al intentar hacer ping a {nombre} ({ip}): {e}')
-
 def ejecutar_comando(comando):
     print(f'Ejecutando prueba, por favor espere...\n')
     try:
@@ -35,34 +24,36 @@ def ejecutar_comando(comando):
     except Exception as e:
         print(f'Ocurrió un error: {e}')
 
+def realizar_ping(ip, nombre='host'):
+    try:
+        comando = ['ping', '-n', '2', ip] if platform.system().lower() == 'windows' else ['ping', '-c', '2', ip]
+        resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if resultado.returncode == 0:
+            print(f'    Hay conexión con {nombre}\n')
+        else:
+            print(f'    No hay conexión con {nombre}\n')
+    except Exception as e:
+        print(f'Ocurrió un error al intentar hacer ping a {nombre} ({ip}): {e}')
+
 def tracert_dns(direccion):
     comando = ['tracert',direccion] if platform.system().lower() == 'windows' else ['traceroute',direccion]
-    ejecutar_comando(comando)
-
-def speedtest():
-    comando = ['speedtest.exe']
     ejecutar_comando(comando)
 
 def diagnostico_automatico():
     for ip, nombre in hosts.items():
         print(f'Verificando conexión con {nombre}')
         realizar_ping(ip, nombre)
-    speedtest()
 
 def menu():
     opciones = {
         1: diagnostico_automatico,
-        2: lambda:realizar_ping('8.8.8.8', 'la Internet'),
-        3: lambda:tracert_dns('8.8.8.8'),
-        4: speedtest,
+        2: lambda:tracert_dns('8.8.8.8'),
         0: exit
     }
     
     while True:
         print(f'1: Diagnóstico automático')
-        print(f'2: Verificar conexión a Internet')
-        print(f'3: Trazar ruta hacia Internet')
-        print(f'4: Prueba de velocidad')
+        print(f'2: Trazar ruta hacia Internet')
         print(f'0: Salir\n')
 
         try:
