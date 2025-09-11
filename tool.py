@@ -1,7 +1,6 @@
 import subprocess
 import platform
 import os
-import speedtest
 from colorama import Fore, Style, init
 
 # Inicializar colorama
@@ -52,28 +51,6 @@ def tracert_dns(direccion):
     comando = ['tracert', direccion] if IS_WINDOWS else ['traceroute', direccion]
     ejecutar_comando(comando)
 
-# Función para realizar una prueba de velocidad
-def realizar_speedtest():
-    # """Realiza una prueba de velocidad usando la biblioteca speedtest-cli."""
-    try:
-        print('Iniciando prueba de velocidad (esto puede tardar un momento)...')
-        st = speedtest.Speedtest()
-        print('Buscando el mejor servidor...')
-        st.get_best_server()
-        print('Realizando prueba de descarga...')
-        velocidad_descarga = st.download() / 1_000_000  # Convertir a Mbps
-        print('Realizando prueba de subida...')
-        velocidad_subida = st.upload() / 1_000_000  # Convertir a Mbps
-        
-        print("\n---Resultados de la Prueba de Velocidad---")
-        print(f"    Descarga: {Fore.CYAN}{velocidad_descarga:.2f} Mbps")
-        print(f"    Subida:   {Fore.CYAN}{velocidad_subida:.2f} Mbps")
-        print(f"    Ping:     {Fore.CYAN}{st.results.ping} ms")
-        print("------------------------------------------\n")
-
-    except Exception as e:
-        print(Fore.RED + f'Ocurrió un error durante la prueba de velocidad: {e}')
-
 # Función para el diagnóstico automático
 def diagnostico_automatico():
     for ip, nombre in hosts.items():
@@ -88,14 +65,12 @@ def menu():
     opciones = {
         '1': diagnostico_automatico,
         '2': lambda: tracert_dns('8.8.8.8'),
-        '3': realizar_speedtest,
         '0': exit
     }
     
     while True:
         print(f'1: Diagnóstico automático')
         print(f'2: Trazar ruta hacia Internet')
-        print(f'3: Prueba de velocidad')
         print(f'0: Salir\n')
 
         try:
