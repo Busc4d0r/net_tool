@@ -34,12 +34,14 @@ def limpiar_pantalla():
 
 def ejecutar_comando(comando):
     """Ejecuta un comando en la terminal y muestra su salida en tiempo real."""
-    print(f'Ejecutando: {" ".join(comando)}\nPor favor espere...')
+    print(f'Ejecutando: {" ".join(comando)}' + '\nPor favor espere...')
     try:
         proceso = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
         for linea in proceso.stdout:
             print(linea, end='')
-        proceso.wait()
+        ret_code = proceso.wait()
+        if ret_code:
+            print(Fore.RED + f'El comando "{" ".join(comando)}" terminó con código de error: {ret_code}')
     except Exception as e:
         print(Fore.RED + f'Ocurrió un error al ejecutar "{" ".join(comando)}": {e}')
 
