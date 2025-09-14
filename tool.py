@@ -34,7 +34,7 @@ def limpiar_pantalla():
 
 def ejecutar_comando(comando):
     """Ejecuta un comando en la terminal y muestra su salida en tiempo real."""
-    print(f'Ejecutando: {" ".join(comando)}' + '\nPor favor espere...')
+    print(f'Ejecutando: {" ".join(comando)}\nPor favor espere...')
     try:
         proceso = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
         for linea in proceso.stdout:
@@ -91,12 +91,50 @@ def diagnostico_automatico():
         else:
             print(Fore.RED + f'    ✗ No hay conexión con {nombre}\n')
 
+def menu_trazar_ruta():
+    """Muestra el sub-menú para trazar ruta y maneja la selección."""
+    while True:
+        limpiar_pantalla()
+        print("===== TRAZAR RUTA =====")
+        if not hosts:
+            print(Fore.YELLOW + "No hay hosts predefinidos.")
+        else:
+            # Create a list of hosts to display
+            host_list = list(hosts.items())
+            for i, (ip, nombre) in enumerate(host_list):
+                print(f"{i+1}: {nombre} ({ip})")
+
+        print("\nc: Ingresar dirección personalizada")
+        print("0: Volver al menú principal\n")
+
+        opcion = input('Seleccione un host o una opción: ')
+
+        if opcion.isdigit() and hosts and 0 < int(opcion) <= len(hosts):
+            ip_seleccionada = host_list[int(opcion)-1][0]
+            limpiar_pantalla()
+            trazar_ruta(ip_seleccionada)
+            print("\n" + "="*40)
+            input(Fore.YELLOW + 'Presione Enter para volver al menú de trazado de ruta...')
+        elif opcion.lower() == 'c':
+            direccion = input("Ingrese la dirección IP o nombre de host: ")
+            if direccion:
+                limpiar_pantalla()
+                trazar_ruta(direccion)
+                print("\n" + "="*40)
+                input(Fore.YELLOW + 'Presione Enter para volver al menú de trazado de ruta...')
+        elif opcion == '0':
+            limpiar_pantalla()
+            break
+        else:
+            print(Fore.RED + 'La opción no es válida. Intente de nuevo.')
+            input(Fore.YELLOW + 'Presione Enter para continuar...')
+
 def menu():
     """Muestra el menú principal y maneja la selección del usuario."""
     while True:
         print("===== MENÚ DE DIAGNÓSTICO DE RED =====")
         print("1: Diagnóstico automático")
-        print("2: Trazar ruta hacia Internet (8.8.8.8)")
+        print("2: Trazar ruta a una dirección")
         print("0: Salir\n")
 
         opcion = input('Ingrese el número de la acción correspondiente: ')
@@ -105,14 +143,14 @@ def menu():
         if opcion == '1':
             diagnostico_automatico()
         elif opcion == '2':
-            trazar_ruta('8.8.8.8')
+            menu_trazar_ruta()
         elif opcion == '0':
             print("Saliendo del programa.")
             break  # Sale del bucle while y termina el script
         else:
             print(Fore.RED + 'La opción no es válida. Intente de nuevo.')
 
-        if opcion != '0':
+        if opcion != '0' and opcion != '2':
             print("\n" + "="*40)
             input(Fore.YELLOW + 'Presione Enter para volver al menú...')
             limpiar_pantalla()
