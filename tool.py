@@ -1,6 +1,7 @@
 import subprocess
 import platform
 import os
+import json
 from colorama import Fore, Style, init
 
 # Inicializar colorama
@@ -9,85 +10,111 @@ init(autoreset=True)
 # Constante para verificar el sistema operativo
 IS_WINDOWS = platform.system().lower() == 'windows'
 
-# Diccionario de hosts
-hosts = {
-    '192.168.1.1': 'el Router',
-    '192.168.100.1': 'Servitel',
-    '192.168.101.1': 'Inter',
-    '8.8.8.8': 'la Internet'
-}
+# Variable global para los hosts
+hosts = {}
 
-# Función para limpiar la pantalla
+def cargar_hosts():
+    """Carga la lista de hosts desde el archivo hosts.json."""
+    global hosts
+    try:
+        with open('hosts.json', 'r') as f:
+            hosts = json.load(f)
+        return True
+    except FileNotFoundError:
+        print(Fore.RED + "Error: No se encontró el archivo 'hosts.json'.")
+        print("Por favor, cree el archivo con el formato {'ip': 'nombre', ...}")
+        return False
+    except json.JSONDecodeError:
+        print(Fore.RED + "Error: El archivo 'hosts.json' tiene un formato inválido.")
+        return False
+
 def limpiar_pantalla():
+    """Limpia la pantalla de la consola."""
     os.system('cls' if IS_WINDOWS else 'clear')
 
-# Función para ejecutar un comando en la terminal
 def ejecutar_comando(comando):
-    print(f'Ejecutando prueba, por favor espere...\n')
+    """Ejecuta un comando en la terminal y muestra su salida en tiempo real."""
+    print(f'Ejecutando: {" ".join(comando)}\nPor favor espere...')
     try:
-        # Usamos Popen para mostrar la salida en tiempo real
         proceso = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
         for linea in proceso.stdout:
             print(linea, end='')
         proceso.wait()
     except Exception as e:
-        print(Fore.RED + f'Ocurrió un error: {e}')
+        print(Fore.RED + f'Ocurrió un error al ejecutar "{" ".join(comando)}": {e}')
 
-# Función para realizar un ping a una IP
-def realizar_ping(ip, nombre='host'):
-        # """Realiza un ping a una IP y devuelve True si hay éxito, False si no."""
+def realizar_ping(ip):
+    """
+    Realiza un ping a una dirección IP para verificar la conectividad.
+
+    Args:
+        ip (str): La dirección IP a la que hacer ping.
+
+    Returns:
+        bool: True si el ping es exitoso, False en caso contrario.
+    """
     try:
-        # Ocultar la salida del comando ping en la consola
         param = '-n' if IS_WINDOWS else '-c'
         comando = ['ping', param, '2', ip]
-        resultado = subprocess.run(comando, capture_output=True, text=True, check=True)
+        subprocess.run(comando, capture_output=True, text=True, check=True, timeout=10)
         return True
+    except subprocess.CalledProcessError:
+        # El comando ping falló (no hubo respuesta)
+        return False
+    except subprocess.TimeoutExpired:
+        print(Fore.YELLOW + f'    El ping a {ip} tardó demasiado en responder.')
+        return False
     except Exception as e:
-        # Si hay un error (ej. check=True falla), asumimos que no hay conexión
+        # Otros errores, como que el comando no exista
+        print(Fore.RED + f'    Error inesperado al hacer ping a {ip}: {e}')
         return False
 
-# Función para trazar una ruta hacia Internet
-def tracert_dns(direccion):
+def trazar_ruta(direccion):
+    """Ejecuta un traceroute (o tracert) a una dirección."""
+    print(f"Trazando la ruta hacia {direccion}...")
     comando = ['tracert', direccion] if IS_WINDOWS else ['traceroute', direccion]
     ejecutar_comando(comando)
 
-# Función para el diagnóstico automático
 def diagnostico_automatico():
+    """Realiza un ping a todos los hosts definidos en hosts.json."""
+    if not hosts:
+        print(Fore.YELLOW + "No hay hosts definidos para el diagnóstico.")
+        return
+
+    print("Iniciando diagnóstico automático...")
     for ip, nombre in hosts.items():
-        print(f'Verificando conexión con {nombre}')
-        if realizar_ping(ip, nombre):
+        print(f'Verificando conexión con {nombre} ({ip})...')
+        if realizar_ping(ip):
             print(Fore.GREEN + f'    ✓ Hay conexión con {nombre}\n')
         else:
             print(Fore.RED + f'    ✗ No hay conexión con {nombre}\n')
 
-# Menú principal
 def menu():
-    opciones = {
-        '1': diagnostico_automatico,
-        '2': lambda: tracert_dns('8.8.8.8'),
-        '0': exit
-    }
-    
+    """Muestra el menú principal y maneja la selección del usuario."""
     while True:
-        print(f'1: Diagnóstico automático')
-        print(f'2: Trazar ruta hacia Internet')
-        print(f'0: Salir\n')
+        print("===== MENÚ DE DIAGNÓSTICO DE RED =====")
+        print("1: Diagnóstico automático")
+        print("2: Trazar ruta hacia Internet (8.8.8.8)")
+        print("0: Salir\n")
 
-        try:
-            opcion = input(f'Ingrese el número de la acción correspondiente: ')
+        opcion = input('Ingrese el número de la acción correspondiente: ')
+        limpiar_pantalla()
+
+        if opcion == '1':
+            diagnostico_automatico()
+        elif opcion == '2':
+            trazar_ruta('8.8.8.8')
+        elif opcion == '0':
+            print("Saliendo del programa.")
+            break  # Sale del bucle while y termina el script
+        else:
+            print(Fore.RED + 'La opción no es válida. Intente de nuevo.')
+
+        if opcion != '0':
+            print("\n" + "="*40)
+            input(Fore.YELLOW + 'Presione Enter para volver al menú...')
             limpiar_pantalla()
-            if opcion in opciones:
-                opciones[opcion]()
-                print("\n" + "="*40)
-                input(Fore.YELLOW + 'Presione Enter para volver al menú...')
-                limpiar_pantalla()
-            else:
-                print(Fore.RED + f'La opción no es válida. Intente de nuevo.')
-                input(Fore.YELLOW + 'Presione Enter para continuar...')
-                limpiar_pantalla()
-        except ValueError:
-            print(Fore.RED + f'Por favor, ingrese un número válido.')
 
-# Punto de entrada del programa
 if __name__ == "__main__":
-    menu()
+    if cargar_hosts():
+        menu()
