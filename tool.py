@@ -27,15 +27,16 @@ def ejecutar_comando(comando):
     try:
         # Usamos Popen para mostrar la salida en tiempo real
         proceso = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
-        for linea in proceso.stdout:
-            print(linea, end='')
+        if proceso.stdout:
+            for linea in proceso.stdout:
+                print(linea, end='')
         proceso.wait()
     except Exception as e:
         print(Fore.RED + f'Ocurrió un error: {e}')
 
 # Función para realizar un ping a una IP
 def realizar_ping(ip, nombre='host'):
-        # """Realiza un ping a una IP y devuelve True si hay éxito, False si no."""
+    """Realiza un ping a una IP y devuelve True si hay éxito, False si no."""
     try:
         # Ocultar la salida del comando ping en la consola
         param = '-n' if IS_WINDOWS else '-c'
@@ -85,8 +86,9 @@ def menu():
                 print(Fore.RED + f'La opción no es válida. Intente de nuevo.')
                 input(Fore.YELLOW + 'Presione Enter para continuar...')
                 limpiar_pantalla()
-        except ValueError:
-            print(Fore.RED + f'Por favor, ingrese un número válido.')
+        except KeyboardInterrupt:
+            print(Fore.YELLOW + '\nSaliendo del programa...')
+            break
 
 # Punto de entrada del programa
 if __name__ == "__main__":
